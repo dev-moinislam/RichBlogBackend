@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+#only backend add to my repository so client is in my git ignore file
+client
+
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
