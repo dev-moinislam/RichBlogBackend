@@ -8,6 +8,6 @@ export const generateAccessToken=(payloda:object)=>{
     return jwt.sign(payloda,`${process.env.ACCESS_TOKEN_SECTER}`,{expiresIn:'10m'})
 }
 
-export const generateRefreshToken=(payloda:object)=>{
-    return jwt.sign(payloda,`${process.env.REFRESH_TOKEN_SECRET}`,{expiresIn:'15m'})
-}
+// export const generateRefreshToken=(payloda:object)=>{
+//     return jwt.sign(payloda,`${process.env.REFRESH_TOKEN_SECRET}`,{expiresIn:'15m'})
+// }

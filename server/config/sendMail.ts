@@ -42,37 +42,13 @@ const sendEmail = async (to:string, url:string, txt:string, username:string) => 
       to: to,
       subject: "Rich Blog",
       html: `
-            <div style="width: 100%; font-family: Arial, sans-serif; ">
-            <div style="max-width: 700px; background-color: #d4e9fc; margin: auto; border: 10px solid #ddd; padding: 50px 20px; font-size: 110%;">
-        
-                <h2 style="text-align: center; text-transform: uppercase; color: #0051a8; font-style:italic">
-                    Welcome, <span style="color: green; font-weight: bold;">${username}</span>
-                </h2>
-        
-                <p style="color: #444; text-align:center">
-                    Congratulations! You're almost set to start using 
-                    <span style="color: orange; font-weight: bold;">Rich Blog</span>.
-                </p>
-        
-        
-                <div style="width: 100%; margin-left:35%;">
-                    <a href=${url} style="background: crimson; text-decoration: none; color: white; padding: 10px 20px; margin: 10px 0; text-align: center; border-radius: 5px;">
-                        ${txt}
-                    </a>
-                </div>
-                <p style="color: #444;text-align:center">
-                    Just click the avobe button to validate your email address.
-                </p>
-                <hr/>
-                <p style="color: #444;">
-                    If the button doesn't work for any reason, you can also click on the link below:
-                </p>
-        
-                <div style="color: #0051a8; text-decoration: underline;">
-                    ${url}
-                </div>
-            </div>
+      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; width:100%">
+        <div style="background-image: linear-gradient(to right, #3490dc, #9b5de5); padding: 2rem; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); height:200px;max-width:400px; text-align: center;">
+          <h2 style="font-size: 2rem; font-weight: 600; color: white; margin-bottom: 1rem;">Welcome, ${username}</h2>
+          <p style="color: white; margin-bottom: 1.5rem;">Congratulations on creating your account. We're thrilled to have you as a member of our <span style="color:purple">Rich Blog</span></p>
+          <a href=${url} style="background-color: #38a169; color: white; padding: 0.5rem 1rem; border-radius: 0.25rem; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); cursor: pointer;text-decoration:none;">${txt}</a>
         </div>
+      </div>
             `,
     };
 

@@ -2,12 +2,12 @@ import { IDecodedToken, ILoginUser } from './../config/interface';
 import { Request,Response } from "express";
 import Users from '../models/userModel'
 import bcrypt from 'bcrypt';
-import {generateAccessToken, generateActiveToken, generateRefreshToken} from '../config/tokenGenerate'
+import {generateAccessToken, generateActiveToken} from '../config/tokenGenerate'
 import sendEmail from '../config/sendMail'
 import { validatePhone,validateEmail } from "../middleware/validate";
 import sendSMS from "../config/sendSms";
 import jwt from 'jsonwebtoken'
-import { generateKeyPairSync } from 'crypto';
+
 
 const CLIENT_URL=`${process.env.BASE_URL}`
 
@@ -16,44 +16,31 @@ const CLIENT_URL=`${process.env.BASE_URL}`
 const authCtrl={
     register:async(req:Request,res:Response)=>{
         try{
-            const {name,account,password}=req.body
+            const {username,account,password}=req.body
             const user=await Users.findOne({account})
             if(user) return res.status(400).json({msg:'Phone number or email is already exist'})
             const hashPass=await bcrypt.hash(password,12)
             
             const registeredUser={
-                name,
+                username,
                 account,
                 password:hashPass
             }
 
-            /* ---------- when user verify/activate their account then this section work --------- */
-            // registered user save to database
-            // registeredUser.save().then((registeredUser)=>{
-            //     console.log('User is Saved successgully',registeredUser)
-            // }).catch((err)=>{
-            //     console.log('Error saving user:',err)
-
-            // })
-
             const active_token=generateActiveToken({registeredUser})
             
-            const url=`${CLIENT_URL}/active/${active_token}`
+            const url=`${CLIENT_URL}/active/${active_token}/`
 
             if(validateEmail(account)){
-                sendEmail(account,url,"Verify your Email adress",name)
+                sendEmail(account,url,"Verify your Email adress",username)
                 res.json({msg:"Please check you Email to verify your account"})
-            }else if(validatePhone(account)){
-                sendSMS(account,url,"Verify your Phone Number",name)
-                res.json({msg:"Please check you Phone number to confirm"})
+            }
+            else if(validatePhone(account)){
+                sendSMS(account,url,"Verify your Phone Number",username)
+                res.json({msg:"Please check you Phone number to verify your account"})
             }
 
-            // res.json({
-            //     status:'OK',
-            //     msg:'User is registered successfully',
-            //     userData:registeredUser,
-            //     active_token
-            // })
+            
         }catch(err:any){
             return res.status(500).json({
                 msg:err.message
@@ -103,43 +90,65 @@ const authCtrl={
             })
         }
     },
-    logout:async(req:Request,res:Response)=>{
-        try{
-            res.clearCookie('refreshtoken',{path:'/api/refresh_token'})
-            
-            return res.json({msg:'Successfully Logged out'})
-        }catch(err:any){
-            return res.status(500).json({
-                msg:err.message
-            })
-        }
-    },
-    refreshToken:async(req:Request,res:Response)=>{
-        try{
-           const rf_token=req.cookies.refreshtoken
-           if(!rf_token) {
-             return res.status(400).json({msg:"Please Login"})
-           }
 
-           const decoded=<IDecodedToken>jwt.verify(rf_token,`${process.env.REFRESH_TOKEN_SECRET}`)
-           if(!decoded.id) {
-            return res.status(400).json({msg:"Please Login"})
-           }
-            
-           const user=<ILoginUser>await Users.findById(decoded.id).select("-password")
-           if(!user) {
-            return res.status(400).json({msg:"Account does't exist"})
-           }
-           
-           const access_token=generateAccessToken({id:user._id})
-           
-           res.json({access_token})
-        }catch(err:any){
-            return res.status(500).json({
-                msg:err.message
+    forgotPassword: async(req: Request, res: Response) => {
+        try {
+          const { account } = req.body
+    
+          const user = await Users.findOne({account})
+          if(!user)
+            return res.status(400).json({msg: 'This account does not exist.'})
+    
+          if(user.type !== 'register')
+            return res.status(400).json({
+              msg: `Quick login account with ${user.type} can't use this function.`
             })
+    
+          const access_token = generateAccessToken({id: user._id})
+    
+          const url = `${CLIENT_URL}/reset_password/${access_token}/`
+    
+          if(validatePhone(account)){
+            sendSMS(account, url, "Forgot password?",user.username)
+            return res.json({msg: "Success! Please check your phone."})
+    
+          }else if(validateEmail(account)){
+            sendEmail(account, url, "Forgot password?",user.username)
+            return res.json({msg: "Success! Please check your email."})
+          }
+    
+        } catch (err: any) {
+          return res.status(500).json({msg: err.message})
         }
-    },
+      },
+      resetPassword: async (req: Request, res: Response) => {
+    
+        try {
+          const { access_token,password }:{ access_token: string; password: string } = req.body
+
+            if(!access_token) return res.status(400).json({msg: "Invalid Authentication."})
+
+            const decoded=<IDecodedToken>jwt.verify(access_token,`${process.env.ACCESS_TOKEN_SECTER}`)
+
+            if(!decoded) return res.status(400).json({msg: "Invalid Authentication."})
+
+            const user:ILoginUser =<ILoginUser> await Users.findOne({_id: decoded.id}).select("-password")
+            if(!user) return res.status(400).json({msg: "User does not exist."})
+
+          const passwordHash = await bcrypt.hash(password, 12)
+    
+          await Users.findOneAndUpdate({_id: user._id}, {
+            password: passwordHash
+          })
+    
+          res.json({ msg: "Reset Password Success!" })
+        } catch (err: any) {
+            console.log(err.message)
+
+          return res.status(500).json({msg: err.message})
+          
+        }
+      },
 }
 
 const loginUser=async(user:ILoginUser,password:string,res:Response)=>{
@@ -150,13 +159,6 @@ const loginUser=async(user:ILoginUser,password:string,res:Response)=>{
     }
 
     const access_token=generateAccessToken({id:user._id})
-    const refresh_token=generateRefreshToken({id:user._id})
-    
-    res.cookie('refreshtoken',refresh_token,{
-        httpOnly:true,
-        path:'/api/refresh_token',
-        maxAge:30*24*60*60*1000
-    })
 
     res.json({
         msg:"User is successfully Login",

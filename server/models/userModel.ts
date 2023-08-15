@@ -3,7 +3,7 @@ import { ILoginUser } from '../config/interface'
 
 
 const userSchema = new mongoose.Schema({
-  name: {
+  username: {
     type: String,
     required: [true, "Please add your name"],
     trim: true,
@@ -31,7 +31,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'register' // login
   },
-  rf_token: { type: String, select: false }
 }, {
   timestamps: true
 })

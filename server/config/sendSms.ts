@@ -4,12 +4,12 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require('twilio')(accountSid, authToken);
 
 
-const sendSMS=(to:string,url:string,txt:string,name:string)=>{
+const sendSMS=(to:string,url:string,txt:string,username:string)=>{
 
     try{    
         client.messages
         .create({
-           body: `${name},${txt}---${url}`,
+           body: `${username},${txt}---${url}`,
            from: '+12186836848',
            to: to
          })

@@ -7,8 +7,8 @@ const router=express.Router()
 router.post('/register',validateRegister,authCtrl.register)
 router.post('/active', authCtrl.activateAccount)
 router.post('/login', authCtrl.login)
-router.get('/logout', authCtrl.logout)
-router.get('/refresh_token', authCtrl.refreshToken)
+router.post('/forgot_password', authCtrl.forgotPassword)
+router.put('/reset_password', authCtrl.resetPassword)
 
 
 

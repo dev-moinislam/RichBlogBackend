@@ -20,16 +20,16 @@ export function validateEmail(email:string) {
 
 // Full User Validation Function
 export const validateRegister=async(req:Request,res:Response,next:NextFunction)=>{
-  const {name,account,password}=req.body
+  const {username,account,password}=req.body
 
   //make a error array and push error message when error occourd
   const errors=[]
 
-//validate  users name   
-  if(!name){
-    errors.push('Please add your name')
-  }else if(name.lenght>20){
-    errors.push('Your name is up to 20 chars long.')
+//validate  users username   
+  if(!username){
+    errors.push('Please add your username')
+  }else if(username.lenght>20){
+    errors.push('Your username is up to 20 chars long.')
   }
 
 //   validate user account
@@ -56,3 +56,5 @@ if(errors.length>0){
   next()
 }
 }
+
+
