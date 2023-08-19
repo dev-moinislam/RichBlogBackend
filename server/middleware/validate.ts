@@ -58,3 +58,26 @@ if(errors.length>0){
 }
 
 
+/* --------------------------- reset Pass validate -------------------------- */
+export const validateResetPassword=async(req:Request,res:Response,next:NextFunction)=>{
+  const {password}=req.body
+
+  //make a error array and push error message when error occourd
+  const errors=[]
+
+
+ if(password.length<6){
+  errors.push('password must be atleast 6 character')
+}
+
+if(errors.length>0){
+  res.status(400).json({
+    msg:errors
+  })
+  console.log(errors)
+}else{
+  next()
+}
+}
+
+

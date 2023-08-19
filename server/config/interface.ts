@@ -27,4 +27,19 @@ export interface IDecodedToken{
 
 export interface IReqAuth extends Request {
     user?: ILoginUser
+}
+
+export interface IGgPayload {
+    email: string
+    email_verified: boolean
+    name: string
+    picture: string
+}
+
+export interface IUserParams {
+    username: string 
+    account: string 
+    password: string
+    avatar?: string
+    type: string
   }

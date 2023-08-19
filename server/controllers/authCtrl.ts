@@ -1,4 +1,4 @@
-import { IDecodedToken, ILoginUser } from './../config/interface';
+import { IDecodedToken, IGgPayload, ILoginUser, IUserParams } from './../config/interface';
 import { Request,Response } from "express";
 import Users from '../models/userModel'
 import bcrypt from 'bcrypt';
@@ -7,9 +7,11 @@ import sendEmail from '../config/sendMail'
 import { validatePhone,validateEmail } from "../middleware/validate";
 import sendSMS from "../config/sendSms";
 import jwt from 'jsonwebtoken'
+import { OAuth2Client } from 'google-auth-library';
 
 
 const CLIENT_URL=`${process.env.BASE_URL}`
+const client = new OAuth2Client(`${process.env.MAIL_CLIENT_ID}`)
 
 
 
@@ -122,6 +124,7 @@ const authCtrl={
         }
       },
       resetPassword: async (req: Request, res: Response) => {
+
     
         try {
           const { access_token,password }:{ access_token: string; password: string } = req.body
@@ -135,11 +138,15 @@ const authCtrl={
             const user:ILoginUser =<ILoginUser> await Users.findOne({_id: decoded.id}).select("-password")
             if(!user) return res.status(400).json({msg: "User does not exist."})
 
-          const passwordHash = await bcrypt.hash(password, 12)
-    
-          await Users.findOneAndUpdate({_id: user._id}, {
-            password: passwordHash
-          })
+            if(password.length<6){
+              res.json('password must be atleast 6 character')
+            }
+
+            const passwordHash = await bcrypt.hash(password, 12)
+ 
+            await Users.findOneAndUpdate({_id: user._id}, {
+              password: passwordHash
+            })
     
           res.json({ msg: "Reset Password Success!" })
         } catch (err: any) {
@@ -149,7 +156,47 @@ const authCtrl={
           
         }
       },
+      googleLogin: async(req: Request, res: Response) => {
+        try {
+          const { credential } = req.body
+
+          const verify = await client.verifyIdToken({
+            idToken: credential, audience: `${process.env.MAIL_CLIENT_ID}`
+          })
+    
+          const {
+            email, email_verified, name, picture
+          } = <IGgPayload>verify.getPayload()
+
+    
+          if(!email_verified)
+            return res.status(500).json({msg: "Email verification failed."})
+    
+          const password = email + 'your google secrect password'
+          const passwordHash = await bcrypt.hash(password, 12)
+    
+          const user = await Users.findOne({account: email})
+    
+          if(user){
+            loginUser(user, password, res)
+          }else{
+            const user:IUserParams = {
+              username:name, 
+              account: email, 
+              password: passwordHash, 
+              avatar: picture,
+              type: 'google'
+            }
+            registerUser(user, res)
+          }
+          
+        } catch (err: any) {
+          return res.status(500).json({msg: err.message})
+        }
+      },
 }
+
+
 
 const loginUser=async(user:ILoginUser,password:string,res:Response)=>{
     const isMatch=await bcrypt.compare(password,user.password)
@@ -166,4 +213,24 @@ const loginUser=async(user:ILoginUser,password:string,res:Response)=>{
         user:{...user._doc,password:''}
     })
 }
+
+
+const registerUser = async (user: IUserParams, res: Response) => {
+  const newUser = new Users(user)
+
+  const access_token = generateAccessToken({id: newUser._id})
+  // const refresh_token = generateRefreshToken({id: newUser._id}, res)
+
+  // newUser.rf_token = refresh_token
+  await newUser.save()
+
+  res.json({
+    msg: 'Login Success!',
+    access_token,
+    user: { ...newUser._doc, password: '' }
+  })
+
+}
+
+
 export default authCtrl;
