@@ -26,9 +26,11 @@ app.use(cookieParser())
 // Routes
 app.use('/api',routes.authRouter)
 app.use('/api',routes.userRouter)
+app.use('/api',routes.categoryRouter)
 
 // Database
 import './config/db'
+
 
 // server listenning
 const PORT = process.env.PORT || 5000

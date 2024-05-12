@@ -43,3 +43,7 @@ export interface IUserParams {
     avatar?: string
     type: string
   }
+
+export interface IReqAuth extends Request {
+    user?: ILoginUser
+  }

@@ -7,7 +7,6 @@ router.post('/user/update',  userCtrl.updateUser)
 
 router.post('/user/update_password', userCtrl.updatePassword)
 
-// router.get('/user/:id', userCtrl.getUser)
 
 
 export default router;

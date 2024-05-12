@@ -1,6 +1,5 @@
-const nodemailer=require('nodemailer')
-import { OAuth2Client } from 'google-auth-library'
-
+const nodemailer = require("nodemailer");
+import { OAuth2Client } from "google-auth-library";
 
 const OAUTH_PLAYGROUND = "https://developers.google.com/oauthplayground";
 
@@ -10,7 +9,7 @@ const REFRESH_TOKEN = `${process.env.MAIL_REFRESH_TOKEN}`;
 const SENDER_MAIL = `${process.env.SENDER_EMAIL_ADDRESS}`;
 
 // send mail
-const sendEmail = async (to:string, url:string, txt:string, username:string) => {
+const sendEmail = async (to: string, url: string, txt: string) => {
   const oAuth2Client = new OAuth2Client(
     CLIENT_ID,
     CLIENT_SECRET,
@@ -23,32 +22,37 @@ const sendEmail = async (to:string, url:string, txt:string, username:string) => 
     const access_token = await oAuth2Client.getAccessToken();
 
     const transport = nodemailer.createTransport({
-        host: 'smtp.gmail.com', // Use the Gmail SMTP server
-        port: 465, // SMTP port for secure connections
-        secure: true, // Use SSL/TLS for secure connections
-        auth: {
-          type: 'OAuth2',
-          user: SENDER_MAIL,
-          clientId: CLIENT_ID,
-          clientSecret: CLIENT_SECRET,
-          refreshToken: REFRESH_TOKEN,
-          accessToken: access_token,
-        },
-      });
-      
+      service: "gmail",
+      auth: {
+        type: "OAuth2",
+        user: SENDER_MAIL,
+        clientId: CLIENT_ID,
+        clientSecret: CLIENT_SECRET,
+        refreshToken: REFRESH_TOKEN,
+        access_token,
+      },
+    });
 
     const mailOptions = {
       from: SENDER_MAIL,
       to: to,
       subject: "Rich Blog",
       html: `
-      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; width:100%">
-        <div style="background-image: linear-gradient(to right, #3490dc, #9b5de5); padding: 2rem; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); height:200px;max-width:400px; text-align: center;">
-          <h2 style="font-size: 2rem; font-weight: 600; color: white; margin-bottom: 1rem;">Welcome, ${username}</h2>
-          <p style="color: white; margin-bottom: 1.5rem;">Congratulations on creating your account. We're thrilled to have you as a member of our <span style="color:purple">Rich Blog</span></p>
-          <a href=${url} style="background-color: #38a169; color: white; padding: 0.5rem 1rem; border-radius: 0.25rem; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); cursor: pointer;text-decoration:none;">${txt}</a>
-        </div>
+      <div style="max-width: 700px; margin:auto; border: 10px solid #ddd; padding: 50px 20px; font-size: 110%;">
+      <h2 style="text-align: center; text-transform: uppercase; color: teal;">Welcome to the DevAT channel</h2>
+      <p>Congratulations! You're almost set to start using Rich Blog. Just click the button below to validate your email address.</p>
+      
+      <div style="text-align: center; margin-top: 30px;">
+          <a href="${url}" style="background: crimson; text-decoration: none; color: white; padding: 15px 40px; display: inline-block; border-radius: 5px; font-size: 18px;">${txt}</a>
       </div>
+  
+      <p>If the button doesn't work for any reason, you can also click on the link below:</p>
+      
+      <div style="text-align: center;">
+          <a href="${url}" style="text-decoration: none; color: teal; font-size: 16px;">${url}</a>
+      </div>
+  </div>
+  
             `,
     };
 
@@ -59,4 +63,4 @@ const sendEmail = async (to:string, url:string, txt:string, username:string) => 
   }
 };
 
-export default sendEmail
+export default sendEmail;
