@@ -166,6 +166,10 @@ const authCtrl={
           const passwordHash = await bcrypt.hash(password, 12)
     
           const user = await Users.findOne({account: email})
+
+          if(user?.type == "register"){
+            return res.status(400).json({msg:"This is a manual login account"})
+          }
     
           if(user){
             loginUser(user, password, res)
@@ -190,13 +194,10 @@ const authCtrl={
 
 const loginUser=async(user:ILoginUser,password:string,res:Response)=>{
     const isMatch=await bcrypt.compare(password,user.password)
+
     
     if(!isMatch){
-      if(user.type !== "google"){
-        return res.status(400).json({msg:"Manually Login to access this account"})
-      }else{
-        return res.status(400).json({msg:"Password is incorrect"})
-      }
+      return res.status(400).json({msg:"Invalid Credentials"})
     }
 
     const access_token=generateAccessToken({id:user._id})

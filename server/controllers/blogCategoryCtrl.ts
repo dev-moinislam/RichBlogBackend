@@ -14,7 +14,7 @@ const categoryCtrl = {
       const name =(req.body.name).toLowerCase()
       console.log(name)
 
-      const newCategory = new Categories( {name })
+      const newCategory = new Categories({ name })
       await newCategory.save()
 
       res.json({ newCategory })
@@ -31,6 +31,8 @@ const categoryCtrl = {
       return res.status(500).json({ msg: errMsg })
     }
   },
+
+
   getCategories: async (req: Request, res: Response) => {
     try {
       const categories = await Categories.find().sort("-createdAt")
@@ -39,10 +41,10 @@ const categoryCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
+
+
   updateCategory: async (req: IReqAuth, res: Response) => {
-
     const{role}=req.body
-
     if(role !== 'admin')
       return res.status(400).json({msg: "Invalid Authentication."})
 
@@ -56,10 +58,10 @@ const categoryCtrl = {
       return res.status(500).json({ msg: err.message })
     }
   },
+
+  
   deleteCategory: async (req: IReqAuth, res: Response) => {
-
     const{role}=req.body
-
     if(role !== 'admin')
       return res.status(400).json({msg: "Invalid Authentication."})
 

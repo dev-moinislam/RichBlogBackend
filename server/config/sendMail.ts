@@ -39,20 +39,13 @@ const sendEmail = async (to: string, url: string, txt: string) => {
       subject: "Rich Blog",
       html: `
       <div style="max-width: 700px; margin:auto; border: 10px solid #ddd; padding: 50px 20px; font-size: 110%;">
-      <h2 style="text-align: center; text-transform: uppercase; color: teal;">Welcome to the DevAT channel</h2>
+      <h2 style="text-align: center; text-transform: uppercase; color: text-gray;">Welcome to the <span style="color:red;">RichBlog</span> web application</h2>
       <p>Congratulations! You're almost set to start using Rich Blog. Just click the button below to validate your email address.</p>
       
       <div style="text-align: center; margin-top: 30px;">
           <a href="${url}" style="background: crimson; text-decoration: none; color: white; padding: 15px 40px; display: inline-block; border-radius: 5px; font-size: 18px;">${txt}</a>
       </div>
-  
-      <p>If the button doesn't work for any reason, you can also click on the link below:</p>
-      
-      <div style="text-align: center;">
-          <a href="${url}" style="text-decoration: none; color: teal; font-size: 16px;">${url}</a>
       </div>
-  </div>
-  
             `,
     };
 
@@ -64,3 +57,10 @@ const sendEmail = async (to: string, url: string, txt: string) => {
 };
 
 export default sendEmail;
+
+
+// <p>If the button doesn't work for any reason, you can also click on the link below:</p>
+      
+// <div style="text-align: center;">
+//     <a href="${url}" style="text-decoration: none; color: teal; font-size: 16px;">${url}</a>
+// </div>
