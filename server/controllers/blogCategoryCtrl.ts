@@ -45,6 +45,7 @@ const categoryCtrl = {
 
   updateCategory: async (req: IReqAuth, res: Response) => {
     const{role}=req.body
+
     if(role !== 'admin')
       return res.status(400).json({msg: "Invalid Authentication."})
 
@@ -55,11 +56,20 @@ const categoryCtrl = {
 
       res.json({ msg: "Update Success!" })
     } catch (err: any) {
-      return res.status(500).json({ msg: err.message })
+      let errMsg;
+
+      if(err.code === 11000){
+        errMsg = Object.values(err.keyValue)[0] + " already exists."
+      }else{
+        let name = Object.keys(err.errors)[0]
+        errMsg = err.errors[`${name}`].message
+      }
+
+      return res.status(500).json({ msg: errMsg })
     }
   },
 
-  
+
   deleteCategory: async (req: IReqAuth, res: Response) => {
     const{role}=req.body
     if(role !== 'admin')
